@@ -1,0 +1,8 @@
+{
+  "self":"{bold}{cyan-fg}",
+  "others":"{cyan-fg}",
+  "system":"{gray-fg}",
+  "success":"{green-fg}",
+  "failure":"{red-fg}",
+  "default":"{white-fg}"
+}

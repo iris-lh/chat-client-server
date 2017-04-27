@@ -1,8 +1,7 @@
 var config = require('./config')
-var credentials = require('./credentials')
 var io = require("socket.io-client")(config.host);
 var ioreq = require("socket.io-request");
-var uuid = require('uuid')
+var colors = require('./colors')
 
 var version = '1.0.1'
 
@@ -19,7 +18,7 @@ module.exports = (elements)=> {
 
 
 
-  log.pushLine(`{gray-fg}CLIENT {white-fg}Connecting to ${config.host}...`)
+  log.pushLine(`${colors.system}CLIENT ${colors.default}Connecting to ${config.host}...`)
 
   io.on('connect', ()=> {
     clearInterval(reconnectIntervalId)
@@ -28,7 +27,7 @@ module.exports = (elements)=> {
       io.emit('clientHeartbeat')
     }, 10000)
 
-    log.pushLine('{green-fg}{gray-fg}CLIENT {white-fg}Connected!{/}')
+    log.pushLine(`${colors.system}CLIENT ${colors.success}Connected!`)
 
     ioreq(io).request(
       'login',
@@ -36,19 +35,19 @@ module.exports = (elements)=> {
       // {version: version}
     ).then((res)=> {
       USERNAME = res.username
-      res.success ? log.pushLine(`{gray-fg}CLIENT {white-fg}Logged in as {cyan-fg}${USERNAME}.{/}`)
-      : log.pushLine('{gray-fg}CLIENT {red-fg}Failed to log in.{/}')
+      res.success ? log.pushLine(`${colors.system}CLIENT ${colors.default}Logged in as ${colors.self}${USERNAME}{/}.`)
+      : log.pushLine(`${colors.system}CLIENT ${colors.failure}Failed to log in.`)
       log.pushLine('')
     })
   })
 
 
   io.on('disconnect', ()=> {
-    log.pushLine('{gray-fg}CLIENT {white-fg}Disconnected.')
+    log.pushLine(`${colors.system}CLIENT ${colors.default}Disconnected.`)
     log.setScrollPerc(100)
     clearInterval(heartbeatIntervalId)
     reconnectIntervalId = setInterval(()=>{
-      log.pushLine('{gray-fg}CLIENT {white-fg}Attempting to reconnect...')
+      log.pushLine(`${colors.system}CLIENT ${colors.default}Attempting to reconnect...`)
       log.setScrollPerc(100)
     }, 1500)
     io.emit('heartbeat')
@@ -64,7 +63,7 @@ module.exports = (elements)=> {
 
   io.on('broadcastMessage', (msg)=> {
     if (msg.user !== USERNAME) {
-      log.pushLine(`{#099-fg}${msg.user} {white-fg}${msg.msg}{/}`)
+      log.pushLine(`${colors.others}${msg.user} ${colors.default}${msg.msg}`)
       log.setScrollPerc(100)
     }
   })
@@ -73,15 +72,15 @@ module.exports = (elements)=> {
     switch(msg.type) {
 
       case 'userDisconnected':
-        log.pushLine(`{gray-fg}SERVER {#099-fg}${msg.user} {white-fg}disconnected.{/}`)
+        log.pushLine(`${colors.system}SERVER ${colors.others}${msg.user} ${colors.default}disconnected.`)
         break;
 
       case 'userConnected':
-        log.pushLine(`{gray-fg}SERVER {#099-fg}${msg.user} {white-fg}connected.{/}`)
+        log.pushLine(`${colors.system}SERVER ${colors.others}${msg.user} ${colors.default}connected.`)
         break;
 
       case 'listUsers':
-        log.pushLine(`{gray-fg}SERVER {white-fg}Other connected users: {#099-fg}${msg.users}{/}`)
+        log.pushLine(`${colors.system}SERVER ${colors.default}Other connected users: ${colors.others}${msg.users}`)
         break;
 
       case 'changeName':
@@ -89,11 +88,11 @@ module.exports = (elements)=> {
         break;
 
       case 'changeNameAlert':
-        log.pushLine(`{gray-fg}SERVER {cyan-fg}${msg.oldName} {white-fg}changed their name to {cyan-fg}${msg.newName}.{/}`)
+        log.pushLine(`${colors.system}SERVER ${colors.others}${msg.oldName} ${colors.default}changed their name to ${colors.others}${msg.newName}.`)
         break;
 
       case 'help':
-        log.pushLine(`{gray-fg}SERVER {white-fg}${msg.data.join(', ')}`)
+        log.pushLine(`${colors.system}SERVER ${colors.default}${msg.data.join(', ')}`)
         break;
     }
     log.setScrollPerc(100)
@@ -112,7 +111,7 @@ module.exports = (elements)=> {
       if (msg.split('')[0] === '/') {
         io.emit('sendCommand', {cmd: msg.split(' ')})
       } else {
-        log.pushLine(`{cyan-fg}${USERNAME} {white-fg}${msg}{/}`)
+        log.pushLine(`${colors.self}${USERNAME}{/} ${colors.default}${msg}`)
         log.setScrollPerc(100)
         io.emit('sendMessage', {msg: msg})
       }
