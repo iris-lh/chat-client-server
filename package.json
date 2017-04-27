@@ -10,6 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "blessed": "^0.1.81",
+    "blessed-contrib": "^4.7.5",
     "prompt": "^1.0.0",
     "request": "^2.81.0",
     "socket.io": "^1.7.3",
