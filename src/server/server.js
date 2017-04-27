@@ -7,13 +7,19 @@ var users = require('./test-users')
 var sessions = {}
 
 io.on("connection", function(socket){
-  var clientIp = socket.request.headers.host
+  var clientIp = socket.request.connection.remoteAddress
   var clientId = socket.client.id
+
+
+  socket.join('/chat')
+
+  console.log(socket.rooms)
 
   socket.on('disconnect', ()=> {
     console.log(`${sessions[clientId].username} disconnected.`)
     delete sessions[clientId]
   })
+
 
   ioreq(socket).response("login", function(req, res){
     if (req.password === users[req.username]) {
@@ -26,6 +32,7 @@ io.on("connection", function(socket){
     }
   });
 
+
   ioreq(socket).response("logout", function(req, res){
     var user = sessions[clientId].username
 
@@ -34,10 +41,14 @@ io.on("connection", function(socket){
     delete sessions[id]
   });
 
-  ioreq(socket).response("speech", function(req, res){
+
+  socket.on("sendMessage", function(req, res){
     var user = sessions[clientId].username
     var msg = req.msg
-    res({user: user, msg: msg})
+    var data = {user: user, msg: msg}
+
+    io.to('/chat').emit('broadcastMessage', data)
+
     console.log(`${new Date()} - ${user}: ${msg}`)
   });
 

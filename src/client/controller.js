@@ -28,10 +28,10 @@ function initiateLogin(screen, el) {
 
 
 module.exports = (elements)=> {
-
   var {screen, login, input, log} = elements
 
   log.log(`Connecting to ${config.host}...`)
+
   ioreq(io).request(
     'login',
     {username: config.username, password: config.password}
@@ -48,6 +48,11 @@ module.exports = (elements)=> {
 
 
 
+  io.on('broadcastMessage', (data)=> {
+    screen.debug('received message')
+    log.log(`{cyan-fg}${data.user} {white-fg}${data.msg}{/}`)
+  })
+
   // LOGIN
 
 
@@ -56,16 +61,13 @@ module.exports = (elements)=> {
 
   input.key('enter', function(ch, key) {
     var msg = this.getValue().slice(0, -1)
-    screen.log(msg, msg.length)
 
     if (msg.length > 0) {
-      ioreq(io).request(
-        'speech',
-        {msg: msg}
-
-      ).then((res)=> {
-        log.log(`{cyan-fg}${res.user} {white-fg}${res.msg}{/}`)
-      })
+      ioreq(io).request('sendMessage', {msg: msg})
+      // .then((res)=> {
+      //   log.log(`{cyan-fg}${res.user} {white-fg}${res.msg}{/}`)
+      // })
+      io.emit('sendMessage', {msg: msg})
     }
 
     this.clearValue();
