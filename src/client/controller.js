@@ -15,7 +15,6 @@ function initiateLogin(screen, el) {
   username.focus()
   username.key(['enter'], function() {
     credentials.username = this.getValue().slice(0, -1)
-    // credentials.username = 'what the hell'
     password.focus()
   })
 
@@ -26,44 +25,26 @@ function initiateLogin(screen, el) {
 
 }
 
-module.exports = (el)=> {
-
-  var sessionId = uuid()
-  var {screen, login, input, log} = el
 
 
+module.exports = (elements)=> {
+
+  var {screen, login, input, log} = elements
+
+  log.log(`Connecting to ${config.host}...`)
   ioreq(io).request(
     'login',
-    {username: 'foo', password: 'bar', sessionId: sessionId}
+    {username: config.username, password: config.password}
   ).then((res)=> {
-    res ? log.log('connected')
-        : log.log('failed to connect')
+    res ? log.log('{green-fg}Connected!{/}')
+        : log.log('{red-fg}Failed to connect.{/}')
+    log.log('')
   })
 
 
-  // var stage = 'login'
-  // screen.append(login)
-  // screen.debug(initiateLogin(login))
-
   screen.append(log)
   screen.append(input)
-
-
-
-  // SCREEN
-
-  screen.key(['q', 'C-c', 'escape'], function(ch, key) {
-      process.exit(0);
-  });
-
-  screen.key('enter', function() {
-    // switch (stage) {
-      // case 'active':
-        input.focus()
-        screen.debug('screen enter')
-        // break;
-    // }
-  });
+  input.focus()
 
 
 
@@ -75,28 +56,27 @@ module.exports = (el)=> {
 
   input.key('enter', function(ch, key) {
     var msg = this.getValue().slice(0, -1)
+    screen.log(msg, msg.length)
 
     if (msg.length > 0) {
       ioreq(io).request(
         'speech',
-        {sessionId: sessionId, msg: msg}
+        {msg: msg}
 
       ).then((res)=> {
-        log.log(`${res.user}: ${res.msg}`)
+        log.log(`{cyan-fg}${res.user} {white-fg}${res.msg}{/}`)
       })
-
-      this.clearValue();
     }
+
+    this.clearValue();
     screen.render();
   });
 
-  input.key('escape', function(ch, key) {
-    var message = this.getValue();
-    screen.focusPop()
-    screen.render();
+  input.key(['escape', 'C-c'], function(ch, key) {
+    process.exit(0)
   });
 
 
 
-  return el
+  return elements
 }
