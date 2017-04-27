@@ -29,17 +29,13 @@ io.on("connection", function(socket){
 
 
   ioreq(socket).response("login", function(req, res){
-    // if (req.password === users[req.username]) {
-      sessions[clientId] = {username: req.username, ip: clientIp}
-      var user = sessions[clientId].username
-      res(true)
-      console.log(`${user} logged in.`)
-      console.log(`ip: ${sessions[clientId].ip}`)
-      io.to('/chat').emit('systemMessage', {type: 'userConnected', user: user})
-      socket.join('/chat')
-    // } else {
-      // res(false)
-    }
+    sessions[clientId] = {username: req.username, ip: clientIp}
+    var user = sessions[clientId].username
+    res(true)
+    console.log(`${user} logged in.`)
+    console.log(`ip: ${sessions[clientId].ip}`)
+    io.to('/chat').emit('systemMessage', {type: 'userConnected', user: user})
+    socket.join('/chat')
   });
 
 
