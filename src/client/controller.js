@@ -3,7 +3,7 @@ var io = require("socket.io-client")(config.host);
 var ioreq = require("socket.io-request");
 var uuid = require('uuid')
 
-var stage = 'login'
+var stage = 'active'
 
 function initiateLogin(screen, el) {
   var username = el.children[0]
@@ -30,9 +30,21 @@ module.exports = (el)=> {
   var {screen, login, input, log} = el
 
 
-  var stage = 'login'
-  screen.append(screen, login)
-  screen.debug(initiateLogin(login))
+  ioreq(io).request(
+    'login',
+    {username: 'foo', password: 'bar', sessionId: sessionId}
+  ).then((res)=> {
+    res ? log.log('connected')
+        : log.log('failed to connect')
+  })
+
+
+  // var stage = 'login'
+  // screen.append(login)
+  // screen.debug(initiateLogin(login))
+
+  screen.append(log)
+  screen.append(input)
 
 
 
@@ -43,15 +55,12 @@ module.exports = (el)=> {
   });
 
   screen.key('enter', function() {
-    switch (stage) {
-      case 'active':
+    // switch (stage) {
+      // case 'active':
         input.focus()
-        break;
-    }
-  });
-
-  screen.key('m', function() {
-    this.log(log.content)
+        screen.debug('screen enter')
+        // break;
+    // }
   });
 
 
