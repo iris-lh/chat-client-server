@@ -62,7 +62,6 @@ io.on("connection", function(socket){
 
     switch(data.cmd) {
       case '/who':
-        console.log('received /who')
         var users = []
 
         for (var key of Object.keys(sessions)) {
@@ -70,12 +69,15 @@ io.on("connection", function(socket){
             users.push(sessions[key].username)
           }
         }
-        console.log(users)
 
-        io.to('/chat').emit('systemMessage', {type: 'listUsers', users: users.join(', ')})
+        var usersString
+        users.length > 0 ? usersString = users.join(', ') : usersString = 'none'
+
+        io.to(clientId).emit('systemMessage', {type: 'listUsers', users: usersString})
+
+        break;
     }
 
-    // console.log('command received: ' + data.cmd)
   });
 
 });
