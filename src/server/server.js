@@ -11,22 +11,36 @@ io.on("connection", function(socket){
   var clientId = socket.client.id
 
 
-  socket.join('/chat')
 
-  console.log(socket.rooms)
+
+
 
   socket.on('disconnect', ()=> {
-    console.log(`${sessions[clientId].username} disconnected.`)
+    var user = sessions[clientId].username
+    console.log(`${user} disconnected.`)
+    io.to('/chat').emit('systemMessage', {type: 'userDisconnected', user: user})
     delete sessions[clientId]
+  })
+
+
+  var heartbeatId = setInterval(()=>{
+    io.emit('serverHeartbeat')
+  }, 10000)
+
+  socket.on('clientHeartbeat', ()=>{
+    console.log('heard heartbeat from ' + clientId)
   })
 
 
   ioreq(socket).response("login", function(req, res){
     if (req.password === users[req.username]) {
       sessions[clientId] = {username: req.username, ip: clientIp}
+      var user = sessions[clientId].username
       res(true)
-      console.log(`${sessions[clientId].username} logged in.`)
+      console.log(`${user} logged in.`)
       console.log(`ip: ${sessions[clientId].ip}`)
+      io.to('/chat').emit('systemMessage', {type: 'userConnected', user: user})
+      socket.join('/chat')
     } else {
       res(false)
     }
@@ -50,6 +64,11 @@ io.on("connection", function(socket){
     io.to('/chat').emit('broadcastMessage', data)
 
     console.log(`${new Date()} - ${user}: ${msg}`)
+  });
+
+  socket.on("sendCommand", function(req, res){
+
+    console.log('command received')
   });
 
 });
