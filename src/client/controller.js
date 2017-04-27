@@ -27,24 +27,26 @@ module.exports = (elements)=> {
       io.emit('clientHeartbeat')
     }, 10000)
 
-    log.log('{green-fg}{gray-fg}CLIENT {white-fg}Connected!{/}')
+    log.pushLine('{green-fg}{gray-fg}CLIENT {white-fg}Connected!{/}')
 
     ioreq(io).request(
       'login',
       {username: credentials.username, version: version}
     ).then((res)=> {
-      res ? log.log(`{gray-fg}CLIENT {green-fg}Logged in as ${credentials.username}.{/}`)
-      : log.log('{gray-fg}CLIENT {red-fg}Failed to log in.{/}')
-      log.log('')
+      res ? log.pushLine(`{gray-fg}CLIENT {white-fg}Logged in as {cyan-fg}${credentials.username}.{/}`)
+      : log.pushLine('{gray-fg}CLIENT {red-fg}Failed to log in.{/}')
+      log.pushLine('')
     })
   })
 
 
   io.on('disconnect', ()=> {
-    log.log('Disconnected.')
+    log.pushLine('{gray-fg}CLIENT {white-fg}Disconnected.')
+    log.setScrollPerc(100)
     clearInterval(heartbeatIntervalId)
     reconnectIntervalId = setInterval(()=>{
-      log.log('{gray-fg}CLIENT {white-fg}Attempting to reconnect...')
+      log.pushLine('{gray-fg}CLIENT {white-fg}Attempting to reconnect...')
+      log.setScrollPerc(100)
     }, 1500)
     io.emit('heartbeat')
   })
@@ -52,30 +54,31 @@ module.exports = (elements)=> {
 
 
   io.on('serverHeartbeat', ()=> {
-    // log.log('heard heartbeat from server')
+    // log.pushLine('heard heartbeat from server')
   })
 
 
 
-
-
-
-
   io.on('broadcastMessage', (msg)=> {
-    var nameColor
-    msg.user === credentials.username ? nameColor = '{cyan-fg}' : nameColor = '{#099-fg}'
-    log.log(`${nameColor}${msg.user} {white-fg}${msg.msg}{/}`)
+    if (msg.user !== credentials.username) {
+      log.pushLine(`{#099-fg}${msg.user} {white-fg}${msg.msg}{/}`)
+      log.setScrollPerc(100)
+    }
   })
 
   io.on('systemMessage', (msg)=> {
     switch(msg.type) {
       case 'userDisconnected':
-        log.log(`{gray-fg}SERVER {#099-fg}${msg.user} {white-fg}disconnected.{/}`)
+        log.pushLine(`{gray-fg}SERVER {#099-fg}${msg.user} {white-fg}disconnected.{/}`)
         break;
       case 'userConnected':
-        log.log(`{gray-fg}SERVER {#099-fg}${msg.user} {white-fg}connected.{/}`)
-      break;
+        log.pushLine(`{gray-fg}SERVER {#099-fg}${msg.user} {white-fg}connected.{/}`)
+        break;
+      case 'listUsers':
+        log.pushLine(`{gray-fg}SERVER {white-fg}Other connected users: {#099-fg}${msg.users}{/}`)
+        break;
     }
+    log.setScrollPerc(100)
   })
 
   // LOGIN
@@ -91,12 +94,13 @@ module.exports = (elements)=> {
       if (msg.split('')[0] === '/') {
         io.emit('sendCommand', {cmd: msg})
       } else {
+        log.pushLine(`{cyan-fg}${credentials.username} {white-fg}${msg}{/}`)
+        log.setScrollPerc(100)
         io.emit('sendMessage', {msg: msg})
       }
     }
 
     this.clearValue();
-    screen.render();
   });
 
   input.key(['escape', 'C-c'], function(ch, key) {
