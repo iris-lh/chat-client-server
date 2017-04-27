@@ -2,7 +2,7 @@ var ioreq = require("socket.io-request");
 var io = require("socket.io")(3000);
 var users = require('./test-users')
 
-
+var version = '0.0.1'
 
 var sessions = {}
 
