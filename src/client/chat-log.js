@@ -4,6 +4,7 @@ var contrib = require('blessed-contrib')
 module.exports = ()=> {
   var log = contrib.log({
     top: 0,
+    bufferLength: 100,
     bottom: 2,
     width: '100%',
     border: {type: "line", fg: "cyan"},
