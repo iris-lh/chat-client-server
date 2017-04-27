@@ -3,7 +3,8 @@ var blessed = require('blessed');
 module.exports = ()=> {
   var element = blessed.textarea({
     bottom: 0,
-    height: 1,
+    height: 3,
+    border: {type: "line", fg: "cyan"},
     inputOnFocus: true,
     padding: {
       top: 0,
@@ -11,11 +12,8 @@ module.exports = ()=> {
     },
     style: {
       fg: '#555',
-      bg: '#111',
-
       focus: {
         fg: 'white',
-        bg: '#222'
       }
     }
   });
