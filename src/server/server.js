@@ -58,9 +58,24 @@ io.on("connection", function(socket){
     console.log(`${new Date()} - ${user}: ${msg}`)
   });
 
-  socket.on("sendCommand", function(req, res){
+  socket.on("sendCommand", function(data){
 
-    console.log('command received')
+    switch(data.cmd) {
+      case '/who':
+        console.log('received /who')
+        var users = []
+
+        for (var key of Object.keys(sessions)) {
+          if (key !== clientId) {
+            users.push(sessions[key].username)
+          }
+        }
+        console.log(users)
+
+        io.to('/chat').emit('systemMessage', {type: 'listUsers', users: users.join(', ')})
+    }
+
+    // console.log('command received: ' + data.cmd)
   });
 
 });
