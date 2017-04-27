@@ -2,14 +2,38 @@ var ioreq = require("socket.io-request");
 var io = require("socket.io")(3000);
 var users = require('./test-users')
 
-var version = '0.1.3'
+var version = '1.0.0'
 
 var sessions = {}
+
+function numberOfAnons(sessions) {
+  count = 0
+  for (var key of Object.keys(sessions)) {
+    if ( (sessions[key].username) && (sessions[key].username.slice(0,9) === 'anon') ) {
+      count++
+    }
+  }
+  return count
+}
 
 io.on("connection", function(socket){
   var clientIp = socket.request.connection.remoteAddress
   var clientId = socket.client.id
 
+  // LOGIN
+  ioreq(socket).response("login", function(req, res){
+    sessions[clientId] = {username: req.username, ip: clientIp}
+    var user = sessions[clientId].username
+    var returnUserName = user ? user : 'anon-' + (numberOfAnons(sessions))
+
+    sessions[clientId].username = returnUserName
+    res({success: true, username: returnUserName})
+
+    console.log(`${returnUserName} logged in.`)
+    console.log(`ip: ${sessions[clientId].ip}`)
+    io.to('/chat').emit('systemMessage', {type: 'userConnected', user: user})
+    socket.join('/chat')
+  });
 
   socket.on('disconnect', ()=> {
     var user = sessions[clientId].username
@@ -24,21 +48,13 @@ io.on("connection", function(socket){
   }, 10000)
 
   socket.on('clientHeartbeat', ()=>{
-    console.log('heard heartbeat from ' + clientId)
+    // console.log('heard heartbeat from ' + clientId)
   })
 
 
-  ioreq(socket).response("login", function(req, res){
-    sessions[clientId] = {username: req.username, ip: clientIp}
-    var user = sessions[clientId].username
-    res(true)
-    console.log(`${user} logged in.`)
-    console.log(`ip: ${sessions[clientId].ip}`)
-    io.to('/chat').emit('systemMessage', {type: 'userConnected', user: user})
-    socket.join('/chat')
-  });
 
 
+  // LOGOUT
   ioreq(socket).response("logout", function(req, res){
     var user = sessions[clientId].username
 
@@ -60,7 +76,7 @@ io.on("connection", function(socket){
 
   socket.on("sendCommand", function(data){
 
-    switch(data.cmd) {
+    switch(data.cmd[0]) {
       case '/who':
         var users = []
 
@@ -75,6 +91,11 @@ io.on("connection", function(socket){
 
         io.to(clientId).emit('systemMessage', {type: 'listUsers', users: usersString})
 
+        break;
+
+      case '/name':
+        sessions[clientId].username = data.cmd[1]
+        io.to(clientId).emit('systemMessage', {type: 'changeName', newName: data.cmd[1]})
         break;
     }
 

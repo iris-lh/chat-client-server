@@ -4,13 +4,14 @@ var io = require("socket.io-client")(config.host);
 var ioreq = require("socket.io-request");
 var uuid = require('uuid')
 
-var version = '0.1.3'
+var version = '1.0.0'
 
 
 module.exports = (elements)=> {
   var {screen, login, input, log} = elements
   var heartbeatIntervalId
   var reconnectIntervalId
+  var USERNAME = process.argv[2]
 
   screen.append(log)
   screen.append(input)
@@ -31,9 +32,11 @@ module.exports = (elements)=> {
 
     ioreq(io).request(
       'login',
-      {username: credentials.username, version: version}
+      {username: USERNAME, version: version}
+      // {version: version}
     ).then((res)=> {
-      res ? log.pushLine(`{gray-fg}CLIENT {white-fg}Logged in as {cyan-fg}${credentials.username}.{/}`)
+      USERNAME = res.username
+      res.success ? log.pushLine(`{gray-fg}CLIENT {white-fg}Logged in as {cyan-fg}${USERNAME}.{/}`)
       : log.pushLine('{gray-fg}CLIENT {red-fg}Failed to log in.{/}')
       log.pushLine('')
     })
@@ -60,7 +63,7 @@ module.exports = (elements)=> {
 
 
   io.on('broadcastMessage', (msg)=> {
-    if (msg.user !== credentials.username) {
+    if (msg.user !== USERNAME) {
       log.pushLine(`{#099-fg}${msg.user} {white-fg}${msg.msg}{/}`)
       log.setScrollPerc(100)
     }
@@ -77,6 +80,10 @@ module.exports = (elements)=> {
       case 'listUsers':
         log.pushLine(`{gray-fg}SERVER {white-fg}Other connected users: {#099-fg}${msg.users}{/}`)
         break;
+      case 'changeName':
+        USERNAME = msg.newName
+        log.pushLine(`{gray-fg}SERVER {white-fg}Name changed to {cyan-fg}${msg.newName}.{/}`)
+        break;
     }
     log.setScrollPerc(100)
   })
@@ -92,9 +99,9 @@ module.exports = (elements)=> {
 
     if (msg.length > 0) {
       if (msg.split('')[0] === '/') {
-        io.emit('sendCommand', {cmd: msg})
+        io.emit('sendCommand', {cmd: msg.split(' ')})
       } else {
-        log.pushLine(`{cyan-fg}${credentials.username} {white-fg}${msg}{/}`)
+        log.pushLine(`{cyan-fg}${USERNAME} {white-fg}${msg}{/}`)
         log.setScrollPerc(100)
         io.emit('sendMessage', {msg: msg})
       }
