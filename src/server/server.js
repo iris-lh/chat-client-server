@@ -8,32 +8,34 @@ var sessions = {}
 
 io.on("connection", function(socket){
   var clientIp = socket.request.headers.host
+  var clientId = socket.client.id
+
+  socket.on('disconnect', ()=> {
+    console.log(`${sessions[clientId].username} disconnected.`)
+    delete sessions[clientId]
+  })
 
   ioreq(socket).response("login", function(req, res){
-    var id = req.sessionId
     if (req.password === users[req.username]) {
-      sessions[id] = {username: req.username, ip: clientIp}
+      sessions[clientId] = {username: req.username, ip: clientIp}
       res(true)
-      console.log(`${sessions[id].username} logged in.`)
-      console.log(`ip: ${sessions[req.sessionId].ip}`)
+      console.log(`${sessions[clientId].username} logged in.`)
+      console.log(`ip: ${sessions[clientId].ip}`)
     } else {
       res(false)
     }
   });
 
   ioreq(socket).response("logout", function(req, res){
-    var id = req
-    var user = sessions[id].username
+    var user = sessions[clientId].username
 
     console.log(`${user} logged out.`)
 
     delete sessions[id]
-    console.log(sessions);
   });
 
   ioreq(socket).response("speech", function(req, res){
-    var id = req.sessionId
-    var user = sessions[id].username
+    var user = sessions[clientId].username
     var msg = req.msg
     res({user: user, msg: msg})
     console.log(`${new Date()} - ${user}: ${msg}`)
