@@ -71,7 +71,7 @@ module.exports = (el)=> {
         {sessionId: sessionId, msg: msg}
 
       ).then((res)=> {
-        log.pushLine(`${res.user}: ${res.msg}`)
+        log.log(`${res.user}: ${res.msg}`)
       })
 
       this.clearValue();
