@@ -18,7 +18,7 @@ module.exports = (elements)=> {
 
 
 
-  log.log(`{gray-fg}CLIENT {white-fg}Connecting to ${config.host}...`)
+  log.pushLine(`{gray-fg}CLIENT {white-fg}Connecting to ${config.host}...`)
 
   io.on('connect', ()=> {
     clearInterval(reconnectIntervalId)
