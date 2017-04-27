@@ -4,7 +4,7 @@ var io = require("socket.io-client")(config.host);
 var ioreq = require("socket.io-request");
 var uuid = require('uuid')
 
-var version = '1.0.0'
+var version = '1.0.1'
 
 
 module.exports = (elements)=> {
