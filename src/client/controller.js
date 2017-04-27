@@ -71,19 +71,27 @@ module.exports = (elements)=> {
 
   io.on('systemMessage', (msg)=> {
     switch(msg.type) {
+
       case 'userDisconnected':
         log.pushLine(`{gray-fg}SERVER {#099-fg}${msg.user} {white-fg}disconnected.{/}`)
         break;
+
       case 'userConnected':
         log.pushLine(`{gray-fg}SERVER {#099-fg}${msg.user} {white-fg}connected.{/}`)
         break;
+
       case 'listUsers':
         log.pushLine(`{gray-fg}SERVER {white-fg}Other connected users: {#099-fg}${msg.users}{/}`)
         break;
+
       case 'changeName':
         USERNAME = msg.newName
+        break;
+
+      case 'changeNameAlert':
         log.pushLine(`{gray-fg}SERVER {cyan-fg}${msg.oldName} {white-fg}changed their name to {cyan-fg}${msg.newName}.{/}`)
         break;
+
       case 'help':
         log.pushLine(`{gray-fg}SERVER {white-fg}${msg.data.join(', ')}`)
         break;
