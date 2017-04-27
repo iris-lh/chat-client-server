@@ -45,13 +45,14 @@ module.exports = (elements)=> {
 
     ioreq(io).request(
       'login',
-      {username: config.username, password: config.password}
+      {username: credentials.username, version: version}
     ).then((res)=> {
-      res ? log.log(`{gray-fg}CLIENT {green-fg}Logged in as ${config.username}.{/}`)
+      res ? log.log(`{gray-fg}CLIENT {green-fg}Logged in as ${credentials.username}.{/}`)
       : log.log('{gray-fg}CLIENT {red-fg}Failed to log in.{/}')
       log.log('')
     })
   })
+
 
   io.on('disconnect', ()=> {
     log.log('Disconnected.')
@@ -70,15 +71,13 @@ module.exports = (elements)=> {
 
 
 
-  screen.append(log)
-  screen.append(input)
-  input.focus()
+
 
 
 
   io.on('broadcastMessage', (msg)=> {
     var nameColor
-    msg.user === config.username ? nameColor = '{cyan-fg}' : nameColor = '{#099-fg}'
+    msg.user === credentials.username ? nameColor = '{cyan-fg}' : nameColor = '{#099-fg}'
     log.log(`${nameColor}${msg.user} {white-fg}${msg.msg}{/}`)
   })
 

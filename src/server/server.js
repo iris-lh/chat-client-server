@@ -11,10 +11,6 @@ io.on("connection", function(socket){
   var clientId = socket.client.id
 
 
-
-
-
-
   socket.on('disconnect', ()=> {
     var user = sessions[clientId].username
     console.log(`${user} disconnected.`)
@@ -33,7 +29,7 @@ io.on("connection", function(socket){
 
 
   ioreq(socket).response("login", function(req, res){
-    if (req.password === users[req.username]) {
+    // if (req.password === users[req.username]) {
       sessions[clientId] = {username: req.username, ip: clientIp}
       var user = sessions[clientId].username
       res(true)
@@ -41,8 +37,8 @@ io.on("connection", function(socket){
       console.log(`ip: ${sessions[clientId].ip}`)
       io.to('/chat').emit('systemMessage', {type: 'userConnected', user: user})
       socket.join('/chat')
-    } else {
-      res(false)
+    // } else {
+      // res(false)
     }
   });
 
