@@ -82,7 +82,10 @@ module.exports = (elements)=> {
         break;
       case 'changeName':
         USERNAME = msg.newName
-        log.pushLine(`{gray-fg}SERVER {white-fg}Name changed to {cyan-fg}${msg.newName}.{/}`)
+        log.pushLine(`{gray-fg}SERVER {cyan-fg}${msg.oldName} {white-fg}changed their name to {cyan-fg}${msg.newName}.{/}`)
+        break;
+      case 'help':
+        log.pushLine(`{gray-fg}SERVER {white-fg}${msg.data.join(', ')}`)
         break;
     }
     log.setScrollPerc(100)

@@ -94,8 +94,14 @@ io.on("connection", function(socket){
         break;
 
       case '/name':
-        sessions[clientId].username = data.cmd[1]
-        io.to(clientId).emit('systemMessage', {type: 'changeName', newName: data.cmd[1]})
+        var oldName = sessions[clientId].username
+        var newName = data.cmd[1]
+        io.to('/chat').emit('systemMessage', {type: 'changeName', oldName: oldName, newName: newName})
+        sessions[clientId].username = newName
+        break;
+
+      case '/help':
+        io.to(clientId).emit('systemMessage', {type: 'help', data: ['/name <YourNewName>', '/who', '/help']})
         break;
     }
 
