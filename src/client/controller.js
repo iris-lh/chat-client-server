@@ -3,6 +3,8 @@ var io = require("socket.io-client")(config.host);
 var ioreq = require("socket.io-request");
 var uuid = require('uuid')
 
+
+
 var stage = 'active'
 
 function initiateLogin(screen, el) {
