@@ -2,7 +2,7 @@ var ioreq = require("socket.io-request");
 var io = require("socket.io")(3000);
 var _ = require('lodash')
 
-var version = '2.0.1'
+var version = '2.0.2'
 
 
 
@@ -11,10 +11,11 @@ function numberOfAnons(sessions) {
 
   // Replace with lodash!
   for (var key of Object.keys(sessions)) {
-    if ( (sessions[key].username) && (sessions[key].username.slice(0,9) === 'anon') ) {
+    if ( (sessions[key].username) && (sessions[key].username.slice(0,4) === 'anon') ) {
       count++
     }
   }
+  console.log(`number of anons: ${count}`)
   return count
 }
 
@@ -26,6 +27,8 @@ function getUserIdByUsername(username, sessions) {
 
 var sessions = {}
 
+var anons = 0
+
 io.on("connection", function(socket){
   var clientIp = socket.request.connection.remoteAddress
   var clientId = socket.client.id
@@ -35,7 +38,16 @@ io.on("connection", function(socket){
   ioreq(socket).response("login", function(req, res){
     sessions[clientId] = {username: req.username, ip: clientIp}
     var user           = sessions[clientId].username
-    var returnUserName = user ? user : 'anon-' + (numberOfAnons(sessions))
+
+
+    var returnUserName
+    if (user) {
+      returnUserName = user
+    } else {
+      returnUserName = 'anon-' + (anons)
+      anons++
+    }
+    // var returnUserName = user ? user : 'anon-' + (numberOfAnons(sessions))
     sessions[clientId].username = returnUserName
     res({success: true, username: returnUserName})
     console.log(`${returnUserName} logged in.`)

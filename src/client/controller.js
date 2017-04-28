@@ -3,7 +3,7 @@ var io = require("socket.io-client")(host);
 var ioreq = require("socket.io-request");
 var colors = require('./colors')
 
-var version = '2.0.1'
+var version = '2.0.2'
 
 
 
