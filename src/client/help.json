@@ -1,0 +1,6 @@
+[
+  ["/help"],
+  ["/who"],
+  [["/name","/nick"],"<YourNewName>"],
+  [["/w","/t","/to"],"<recipient> <message>"]
+]
