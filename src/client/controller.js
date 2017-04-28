@@ -1,5 +1,5 @@
-var config = require('./config')
-var io = require("socket.io-client")(config.host);
+var host = require('./host')
+var io = require("socket.io-client")(host);
 var ioreq = require("socket.io-request");
 var colors = require('./colors')
 
@@ -18,7 +18,7 @@ module.exports = (elements)=> {
 
 
 
-  log.pushLine(`${colors.system}CLIENT ${colors.default}Connecting to ${config.host}...`)
+  log.pushLine(`${colors.system}CLIENT ${colors.default}Connecting to ${host}...`)
 
   io.on('connect', ()=> {
     clearInterval(reconnectIntervalId)
