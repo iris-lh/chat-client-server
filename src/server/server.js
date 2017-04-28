@@ -1,8 +1,11 @@
 var ioreq = require("socket.io-request");
 var io = require("socket.io")(3000);
 var users = require('./test-users')
+var _ = require('lodash')
 
 var version = '1.0.1'
+
+
 
 var sessions = {}
 
@@ -14,6 +17,10 @@ function numberOfAnons(sessions) {
     }
   }
   return count
+}
+
+function getUserIdByUsername(username, sessions) {
+  return _.findKey(sessions, function(s) { return s.username === username; });
 }
 
 io.on("connection", function(socket){
@@ -51,58 +58,61 @@ io.on("connection", function(socket){
   })
 
 
-
-
   // LOGOUT
   ioreq(socket).response("logout", function(req, res){
     var user = sessions[clientId].username
-
     console.log(`${user} logged out.`)
-
     delete sessions[id]
   });
 
 
   socket.on("sendMessage", function(req, res){
     var user = sessions[clientId].username
-    var msg = req.msg
+    var msg  = req.msg
     var data = {user: user, msg: msg}
-
     io.to('/chat').emit('broadcastMessage', data)
-
     console.log(`${new Date()} - ${user}: ${msg}`)
   });
 
   socket.on("sendCommand", function(data){
 
-    switch(data.cmd[0]) {
-      case '/who':
-        var users = []
 
-        for (var key of Object.keys(sessions)) {
-          if (key !== clientId) {
-            users.push(sessions[key].username)
-          }
+    if (data.cmd[0] === '/who') {
+      var users = []
+      for (var key of Object.keys(sessions)) {
+        if (key !== clientId) {
+          users.push(sessions[key].username)
         }
+      }
+      var usersString
+      users.length > 0 ? usersString = users.join(', ') : usersString = 'none'
+      io.to(clientId).emit('systemMessage', {type: 'listUsers', users: usersString})
 
-        var usersString
-        users.length > 0 ? usersString = users.join(', ') : usersString = 'none'
 
-        io.to(clientId).emit('systemMessage', {type: 'listUsers', users: usersString})
+    } else if (data.cmd[0] === '/name') {
+      var oldName = sessions[clientId].username
+      var newName = data.cmd[1]
+      io.to('/chat').emit('systemMessage', {type: 'changeNameAlert', oldName: oldName, newName: newName})
+      io.to(clientId).emit('systemMessage', {type: 'changeName', newName: newName})
+      sessions[clientId].username = newName
 
-        break;
 
-      case '/name':
-        var oldName = sessions[clientId].username
-        var newName = data.cmd[1]
-        io.to('/chat').emit('systemMessage', {type: 'changeNameAlert', oldName: oldName, newName: newName})
-        io.to(clientId).emit('systemMessage', {type: 'changeName', newName: newName})
-        sessions[clientId].username = newName
-        break;
+    } else if (data.cmd[0] === '/help') {
+      io.to(clientId).emit('systemMessage', {type: 'help', data: ['/name <YourNewName>', '/who','/w <recipient> <message>', '/help']})
 
-      case '/help':
-        io.to(clientId).emit('systemMessage', {type: 'help', data: ['/name <YourNewName>', '/who', '/help']})
-        break;
+
+    } else if (data.cmd[0] === '/w') {
+      var args        = data.cmd
+      var sender      = sessions[clientId].username
+      var recipient   = args[1]
+      var recipientId = getUserIdByUsername(recipient, sessions)
+      var msg         = args.slice(2, args.length).join(' ')
+      var data        = {sender: sender, recipient: recipient, msg: msg}
+
+      console.log(`${sender} to ${recipient}: ${msg}`)
+
+      io.to(clientId).emit('whisper', data)
+      io.to(recipientId).emit('whisper', data)
     }
 
   });

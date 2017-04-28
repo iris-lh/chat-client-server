@@ -54,19 +54,24 @@ module.exports = (elements)=> {
   })
 
 
-
   io.on('serverHeartbeat', ()=> {
     // log.pushLine('heard heartbeat from server')
   })
 
 
-
   io.on('broadcastMessage', (msg)=> {
-    if (msg.user !== USERNAME) {
-      log.pushLine(`${colors.others}${msg.user} ${colors.default}${msg.msg}`)
-      log.setScrollPerc(100)
-    }
+    var nameColor = msg.user !== USERNAME ? colors.others : colors.self
+    log.pushLine(`${nameColor}${msg.user}{/} ${colors.default}${msg.msg}`)
+    log.setScrollPerc(100)
   })
+
+  io.on('whisper', (data)=> {
+    var tag = data.sender === USERNAME ? `To ${data.recipient}` : `From ${data.sender}`
+
+    log.pushLine(`${colors.whisperTag}${tag}{/} ${colors.whisperBody}${data.msg}{/}`)
+    log.setScrollPerc(100)
+  })
+
 
   io.on('systemMessage', (msg)=> {
     switch(msg.type) {
@@ -108,8 +113,6 @@ module.exports = (elements)=> {
       if (msg.split('')[0] === '/') {
         io.emit('sendCommand', {cmd: msg.split(' ')})
       } else {
-        log.pushLine(`${colors.self}${USERNAME}{/} ${colors.default}${msg}`)
-        log.setScrollPerc(100)
         io.emit('sendMessage', {msg: msg})
       }
     }
