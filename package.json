@@ -12,8 +12,6 @@
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.7.5",
     "lodash": "^4.17.4",
-    "prompt": "^1.0.0",
-    "request": "^2.81.0",
     "socket.io": "^1.7.3",
     "socket.io-request": "^0.3.1"
   }

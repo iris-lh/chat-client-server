@@ -5,11 +5,11 @@ var ChatInput  = require('./chat-input')
 var ChatLog    = require('./chat-log')
 var Controller = require('./controller.js')
 
-var el = Controller({
+var elements = Controller({
   screen: Screen(),
   login:  Login(),
   log:    ChatLog(),
   input:  ChatInput()
 })
 
-el.screen.render();
+elements.screen.render();

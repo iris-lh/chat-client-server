@@ -3,7 +3,8 @@ var io = require("socket.io-client")(host);
 var ioreq = require("socket.io-request");
 var colors = require('./colors')
 
-var version = '1.0.1'
+var version = '2.0.1'
+
 
 
 module.exports = (elements)=> {
@@ -111,7 +112,7 @@ module.exports = (elements)=> {
 
     if (msg.length > 0) {
       if (msg.split('')[0] === '/') {
-        io.emit('sendCommand', {cmd: msg.split(' ')})
+        io.emit('sendCommand', {cmd: msg})
       } else {
         io.emit('sendMessage', {msg: msg})
       }

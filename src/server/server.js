@@ -1,16 +1,15 @@
 var ioreq = require("socket.io-request");
 var io = require("socket.io")(3000);
-var users = require('./test-users')
 var _ = require('lodash')
 
-var version = '1.0.1'
+var version = '2.0.1'
 
 
-
-var sessions = {}
 
 function numberOfAnons(sessions) {
   count = 0
+
+  // Replace with lodash!
   for (var key of Object.keys(sessions)) {
     if ( (sessions[key].username) && (sessions[key].username.slice(0,9) === 'anon') ) {
       count++
@@ -23,11 +22,16 @@ function getUserIdByUsername(username, sessions) {
   return _.findKey(sessions, function(s) { return s.username === username; });
 }
 
+
+
+var sessions = {}
+
 io.on("connection", function(socket){
   var clientIp = socket.request.connection.remoteAddress
   var clientId = socket.client.id
 
-  // LOGIN
+
+
   ioreq(socket).response("login", function(req, res){
     sessions[clientId] = {username: req.username, ip: clientIp}
     var user           = sessions[clientId].username
@@ -41,12 +45,14 @@ io.on("connection", function(socket){
   });
 
 
+
   socket.on('disconnect', ()=> {
     var user = sessions[clientId].username
     console.log(`${user} disconnected.`)
     io.to('/chat').emit('systemMessage', {type: 'userDisconnected', user: user})
     delete sessions[clientId]
   })
+
 
 
   var heartbeatId = setInterval(()=>{
@@ -58,13 +64,6 @@ io.on("connection", function(socket){
   })
 
 
-  // LOGOUT
-  ioreq(socket).response("logout", function(req, res){
-    var user = sessions[clientId].username
-    console.log(`${user} logged out.`)
-    delete sessions[id]
-  });
-
 
   socket.on("sendMessage", function(req, res){
     var user = sessions[clientId].username
@@ -74,11 +73,16 @@ io.on("connection", function(socket){
     console.log(`${new Date()} - ${user}: ${msg}`)
   });
 
+
+
   socket.on("sendCommand", function(data){
+    var cmd = data.cmd.split(' ')
 
 
-    if (data.cmd[0] === '/who') {
+    if (cmd[0] === '/who') {
       var users = []
+
+      // Replace with lodash!
       for (var key of Object.keys(sessions)) {
         if (key !== clientId) {
           users.push(sessions[key].username)
@@ -89,20 +93,20 @@ io.on("connection", function(socket){
       io.to(clientId).emit('systemMessage', {type: 'listUsers', users: usersString})
 
 
-    } else if (data.cmd[0] === '/name') {
+    } else if (cmd[0] === '/name') {
       var oldName = sessions[clientId].username
-      var newName = data.cmd[1]
+      var newName = cmd[1]
       io.to('/chat').emit('systemMessage', {type: 'changeNameAlert', oldName: oldName, newName: newName})
       io.to(clientId).emit('systemMessage', {type: 'changeName', newName: newName})
       sessions[clientId].username = newName
 
 
-    } else if (data.cmd[0] === '/help') {
+    } else if (cmd[0] === '/help') {
       io.to(clientId).emit('systemMessage', {type: 'help', data: ['/name <YourNewName>', '/who','/w <recipient> <message>', '/help']})
 
 
-    } else if (data.cmd[0] === '/w') {
-      var args        = data.cmd
+    } else if (cmd[0] === '/w') {
+      var args        = cmd
       var sender      = sessions[clientId].username
       var recipient   = args[1]
       var recipientId = getUserIdByUsername(recipient, sessions)
