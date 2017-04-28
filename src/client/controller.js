@@ -98,9 +98,6 @@ module.exports = (elements)=> {
     log.setScrollPerc(100)
   })
 
-  // LOGIN
-
-
 
   // INPUT
 

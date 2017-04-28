@@ -1,6 +1,9 @@
 {
+  "uiPrimary":"cyan",
   "self":"{bold}{cyan-fg}",
   "others":"{cyan-fg}",
+  "whisperTag":"{#f0f-fg}",
+  "whisperBody":"{bold}{#f0f-fg}",
   "system":"{gray-fg}",
   "success":"{green-fg}",
   "failure":"{red-fg}",

@@ -1,10 +1,11 @@
 var blessed = require('blessed');
+var colors = require('./colors')
 
 module.exports = ()=> {
   var element = blessed.textarea({
     bottom: 0,
     height: 3,
-    border: {type: "line", fg: "cyan"},
+    border: {type: "line", fg: colors.uiPrimary},
     inputOnFocus: true,
     padding: {
       top: 0,

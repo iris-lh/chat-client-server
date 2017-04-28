@@ -23,17 +23,16 @@ io.on("connection", function(socket){
   // LOGIN
   ioreq(socket).response("login", function(req, res){
     sessions[clientId] = {username: req.username, ip: clientIp}
-    var user = sessions[clientId].username
+    var user           = sessions[clientId].username
     var returnUserName = user ? user : 'anon-' + (numberOfAnons(sessions))
-
     sessions[clientId].username = returnUserName
     res({success: true, username: returnUserName})
-
     console.log(`${returnUserName} logged in.`)
     console.log(`ip: ${sessions[clientId].ip}`)
     io.to('/chat').emit('systemMessage', {type: 'userConnected', user: user})
     socket.join('/chat')
   });
+
 
   socket.on('disconnect', ()=> {
     var user = sessions[clientId].username
