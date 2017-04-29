@@ -38,6 +38,7 @@ module.exports = (elements)=> {
       USERNAME = res.username
       res.success ? log.pushLine(`${colors.system}CLIENT ${colors.default}Logged in as ${colors.self}${USERNAME}{/}.`)
       : log.pushLine(`${colors.system}CLIENT ${colors.failure}Failed to log in.`)
+      log.pushLine(`${colors.system}CLIENT ${colors.default}Type /help for list of commands.`)
       log.pushLine('')
     })
   })
