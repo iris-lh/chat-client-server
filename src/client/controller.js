@@ -2,8 +2,7 @@ var host = require('./host')
 var io = require("socket.io-client")(host);
 var ioreq = require("socket.io-request");
 var colors = require('./colors')
-
-var version = '2.0.2'
+var version = require('../../package').version
 
 
 
@@ -29,6 +28,7 @@ module.exports = (elements)=> {
     }, 10000)
 
     log.pushLine(`${colors.system}CLIENT ${colors.success}Connected!`)
+
 
     ioreq(io).request(
       'login',

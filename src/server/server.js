@@ -1,8 +1,7 @@
 var ioreq = require("socket.io-request");
 var io = require("socket.io")(3000);
 var _ = require('lodash')
-
-var version = '2.0.2'
+var version = require('../../package').version
 
 
 
